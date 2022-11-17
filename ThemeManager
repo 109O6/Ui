@@ -4,9 +4,9 @@ local ThemeManager = {} do
 	-- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
 
 	ThemeManager.Library = nil
-	ThemeManager.BuiltInThemes = {
-		['Default'] 		= { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"141414","AccentColor":"483a57","BackgroundColor":"141414","OutlineColor":"1e1d1d"}') },
-}
+	ThemeManager.BuiltInThemes = {    
+		['Default'] 		= { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"090909","AccentColor":"5c627e","BackgroundColor":"101010","OutlineColor":"9b9b9b"}') },
+}                            
 
 	function ThemeManager:ApplyTheme(theme)
 		local customThemeData = self:GetCustomTheme(theme)
