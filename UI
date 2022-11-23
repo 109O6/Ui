@@ -878,7 +878,7 @@ function library:page(props)
 			BorderColor3 = Color3.fromRGB(12, 12, 12),
 			BorderMode = "Inset",
 			BorderSizePixel = 1,
-			Size = UDim2.new(0,75,1,0),
+			Size = UDim2.new(0,100,1,0),
 			Parent = self.tabsbuttons
 		}
 	)
