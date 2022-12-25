@@ -2570,7 +2570,8 @@ function Library:CreateWindow(...)
             Visible = false;
             ZIndex = 2;
             ScrollBarImageTransparency = 0;
-            ScrollBarThickness = 5;
+            ScrollBarThickness = 2;
+            BorderSizePixel = 0;
             Parent = TabContainer;
         });
         local Sized = 0
