@@ -1856,10 +1856,10 @@ do
             ZIndex = 21;
             Parent = ListInner;
 
-            TopImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
-            BottomImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
+            TopImage = 'rbxassetid://7445543667',
+            BottomImage = 'rbxassetid://7445543667',
 
-            ScrollBarThickness = 3,
+            ScrollBarThickness = 1,
             ScrollBarImageColor3 = Library.AccentColor, 
         });
 
