@@ -1854,7 +1854,6 @@ do
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 21;
             Parent = ListInner;
-            BorderSizePixel = 0;
 
             TopImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
             BottomImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
@@ -2570,7 +2569,7 @@ function Library:CreateWindow(...)
             Visible = false;
             ZIndex = 2;
             ScrollBarImageTransparency = 0;
-            ScrollBarThickness = 2;
+            ScrollBarThickness = 1;
             BorderSizePixel = 0;
             Parent = TabContainer;
         });
