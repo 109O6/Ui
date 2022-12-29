@@ -2569,7 +2569,7 @@ function Library:CreateWindow(...)
             Visible = false;
             ZIndex = 2;
             ScrollBarImageTransparency = 0;
-            ScrollBarThickness = 0.5;
+            ScrollBarThickness = 2;
             BorderSizePixel = 0;
             Parent = TabContainer;
         });
