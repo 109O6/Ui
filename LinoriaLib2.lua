@@ -3,7 +3,6 @@ local TextService = game:GetService('TextService');
 local TweenService = game:GetService('TweenService');
 local CoreGui = game:GetService('CoreGui');
 local RunService = game:GetService('RunService')
-local GuiService = game:GetService('GuiService')
 local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = game:GetService('Players').LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
@@ -23,23 +22,22 @@ getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
 local Library = {
+    Connections = {};
+    Instances = {};
+
     Registry = {};
     RegistryMap = {};
 
     HudRegistry = {};
 
-    FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(28, 28, 28);
-    BackgroundColor = Color3.fromRGB(16, 16, 16);
-    AccentColor = Color3.fromRGB(255, 255, 255);
-    OutlineColor = Color3.fromRGB(14, 14, 14);
-
-    Black = Color3.new(0, 0, 0);
+    FontColor = Color3.fromRGB(175, 175, 175);
+    MainColor = Color3.fromRGB(30, 30, 30);
+    BackgroundColor = Color3.fromRGB(20, 20, 20);
+    AccentColor = Color3.fromRGB(0, 219, 225);
+    InlineColor = Color3.fromRGB(75, 75, 75);
+    OutlineColor = Color3.fromRGB(75, 75, 75);
 
     OpenedFrames = {};
-
-    Signals = {};
-    ScreenGui = ScreenGui;
 };
 
 local RainbowStep = 0
@@ -133,7 +131,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         BorderColor3 = Library.OutlineColor,
 
         Size = UDim2.fromOffset(X + 5, Y + 4),
-        ZIndex = 100,
+        ZIndex = 11;
         Parent = Library.ScreenGui,
 
         Visible = false,
@@ -146,7 +144,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         Text = InfoStr,
         TextColor3 = Library.FontColor,
         TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = Tooltip.ZIndex + 1,
+        ZIndex = 12;
 
         Parent = Tooltip;
     });
@@ -159,7 +157,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     Library:AddToRegistry(Label, {
         TextColor3 = 'FontColor',
     });
-    
+
     local IsHovering = false
     HoverInstance.MouseEnter:Connect(function()
         IsHovering = true
@@ -216,16 +214,6 @@ function Library:MouseIsOverOpenedFrame()
         end;
     end;
 end;
-
-function Library:IsMouseOverFrame(Frame)
-    local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize;
-
-    if Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
-        and Mouse.Y >= AbsPos.Y and Mouse.Y <= AbsPos.Y + AbsSize.Y then
-
-        return true;
-    end;
-end
 
 function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
     return (1 - ((Value - MinA) / (MaxA - MinA))) * MinB + ((Value - MinA) / (MaxA - MinA)) * MaxB;
@@ -566,13 +554,13 @@ do
             RgbBox.Text = table.concat({ math.floor(ColorPicker.Value.R * 255), math.floor(ColorPicker.Value.G * 255), math.floor(ColorPicker.Value.B * 255) }, ', ')
 
             if ColorPicker.Changed then
-                ColorPicker.Changed(ColorPicker.Value)
+                ColorPicker.Changed();
             end;
         end;
 
         function ColorPicker:OnChanged(Func)
             ColorPicker.Changed = Func;
-            Func(ColorPicker.Value)
+            Func();
         end;
 
         function ColorPicker:Show()
@@ -666,7 +654,6 @@ do
         end))
 
         ColorPicker:Display();
-        ColorPicker.DisplayFrame = DisplayFrame
 
         Options[Idx] = ColorPicker;
 
@@ -817,34 +804,32 @@ do
         end;
 
         function KeyPicker:Update()
-            pcall(function()
-                if Info.NoUI then
-                    return;
+            if Info.NoUI then
+                return;
+            end;
+
+            local State = KeyPicker:GetState();
+
+            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+
+            ContainerLabel.Visible = true;
+            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
+
+            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+
+            local YSize = 0
+            local XSize = 0
+            
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA('TextLabel') and Label.Visible then
+                    YSize = YSize + 18;
+                    if (Label.TextBounds.X > XSize) then
+                        XSize = Label.TextBounds.X 
+                    end 
                 end;
+            end;
 
-                local State = KeyPicker:GetState();
-
-                ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
-
-                ContainerLabel.Visible = true;
-                ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
-
-                Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
-
-                local YSize = 0
-                local XSize = 0
-                
-                for _, Label in next, Library.KeybindContainer:GetChildren() do
-                    if Label:IsA('TextLabel') and Label.Visible then
-                        YSize = YSize + 18;
-                        if (Label.TextBounds.X > XSize) then
-                            XSize = Label.TextBounds.X 
-                        end 
-                    end;
-                end;
-
-                Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
-            end)
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
 
         function KeyPicker:GetState()
@@ -1335,7 +1320,7 @@ do
             Box.Text = Text;
                 
             if Textbox.Changed then
-                Textbox.Changed(Textbox.Value)
+                Textbox.Changed();
             end;
         end;
 
@@ -1397,7 +1382,7 @@ do
 
         function Textbox:OnChanged(Func)
             Textbox.Changed = Func;
-            Func(Textbox.Value);
+            Func();
         end;
 
         Groupbox:AddBlank(5);
@@ -1492,7 +1477,7 @@ do
 
         function Toggle:OnChanged(Func)
             Toggle.Changed = Func;
-            Func(Toggle.Value);
+            Func();
         end;
 
         function Toggle:SetValue(Bool)
@@ -1509,7 +1494,7 @@ do
             end
 
             if Toggle.Changed then
-                Toggle.Changed(Toggle.Value)
+                Toggle.Changed();
             end;
         end;
 
@@ -1637,14 +1622,7 @@ do
 
         function Slider:Display()
             local Suffix = Info.Suffix or '';
-
-            if Info.Compact then
-                DisplayLabel.Text = Info.Text .. ': ' .. Slider.Value .. Suffix
-            elseif Info.HideMax then
-                DisplayLabel.Text = string.format('%s', Slider.Value .. Suffix)
-            else
-                DisplayLabel.Text = string.format('%s/%s', Slider.Value .. Suffix, Slider.Max .. Suffix);
-            end
+            DisplayLabel.Text = string.format('%s/%s', Slider.Value .. Suffix, Slider.Max .. Suffix);
 
             local X = math.ceil(Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, Slider.MaxSize));
             Fill.Size = UDim2.new(0, X, 1, 0);
@@ -1654,7 +1632,7 @@ do
 
         function Slider:OnChanged(Func)
             Slider.Changed = Func;
-            Func(Slider.Value);
+            Func();
         end;
 
         local function Round(Value)
@@ -1662,8 +1640,10 @@ do
                 return math.floor(Value);
             end;
 
-    
-            return tonumber(string.format('%.' .. Slider.Rounding .. 'f', Value))
+            local Str = Value .. '';
+            local Dot = Str:find('%.');
+
+            return Dot and tonumber(Str:sub(1, Dot + Slider.Rounding)) or Value;
         end;
 
         function Slider:GetValueFromXOffset(X)
@@ -1683,7 +1663,7 @@ do
             Slider:Display();
 
             if Slider.Changed then
-                Slider.Changed(Slider.Value)
+                Slider.Changed();
             end;
         end;
 
@@ -1704,7 +1684,7 @@ do
                     Slider:Display();
 
                     if nValue ~= OldValue and Slider.Changed then
-                        Slider.Changed(Slider.Value)
+                        Slider.Changed();
                     end;
 
                     RenderStepped:Wait();
@@ -1738,19 +1718,17 @@ do
 
         local RelativeOffset = 0;
 
-        if not Info.Compact then
-            local DropdownLabel = Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 10);
-                TextSize = 14;
-                Text = Info.Text;
-                TextXAlignment = Enum.TextXAlignment.Left;
-                TextYAlignment = Enum.TextYAlignment.Bottom;
-                ZIndex = 5;
-                Parent = Container;
-            });
+        local DropdownLabel = Library:CreateLabel({
+            Size = UDim2.new(1, 0, 0, 10);
+            TextSize = 14;
+            Text = Info.Text;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            TextYAlignment = Enum.TextYAlignment.Bottom;
+            ZIndex = 5;
+            Parent = Container;
+        });
 
-            Groupbox:AddBlank(3);
-        end
+        Groupbox:AddBlank(3);
 
         for _, Element in next, Container:GetChildren() do
             if not Element:IsA('UIListLayout') then
@@ -1854,12 +1832,11 @@ do
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 21;
             Parent = ListInner;
-            BorderSizePixel = 0;
 
             TopImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
             BottomImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
 
-            ScrollBarThickness = 2,
+            ScrollBarThickness = 3,
             ScrollBarImageColor3 = Library.AccentColor, 
         });
 
@@ -1933,7 +1910,6 @@ do
                     ZIndex = 23;
                     Active = true,
                     Parent = Scrolling;
-                    Visible = true;
                 });
 
                 Library:AddToRegistry(Button, {
@@ -1967,12 +1943,11 @@ do
                 function Table:UpdateButton()
                     if Info.Multi then
                         Selected = Dropdown.Value[Value];
-                        ButtonLabel.TextColor3 = Selected and Color3.fromRGB(0, 255, 0) or Library.FontColor;
                     else
                         Selected = Dropdown.Value == Value;
-                        ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     end;
 
+                    ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'AccentColor' or 'FontColor';
                 end;
 
@@ -2008,7 +1983,7 @@ do
                             Dropdown:Display();
 
                             if Dropdown.Changed then
-                                Dropdown.Changed(Dropdown.Value)
+                                Dropdown.Changed();
                             end;
 
                             Library:AttemptSave();
@@ -2043,7 +2018,7 @@ do
 
         function Dropdown:OnChanged(Func)
             Dropdown.Changed = Func;
-            Func(Dropdown.Value);
+            Func();
         end;
 
         function Dropdown:SetValue(Val)
@@ -2068,7 +2043,7 @@ do
             Dropdown:SetValues();
             Dropdown:Display();
             
-            if Dropdown.Changed then Dropdown.Changed(Dropdown.Value) end
+            if Dropdown.Changed then Dropdown.Changed() end
         end;
 
         DropdownOuter.InputBegan:Connect(function(Input)
@@ -2096,39 +2071,20 @@ do
         Dropdown:SetValues();
         Dropdown:Display();
 
-        local Defaults = {}
-
         if type(Info.Default) == 'string' then
-            local Idx = table.find(Dropdown.Values, Info.Default)
-            if Idx then
-                table.insert(Defaults, Idx)
-            end
-        elseif type(Info.Default) == 'table' then
-            for _, Value in next, Info.Default do
-                local Idx = table.find(Dropdown.Values, Value)
-                if Idx then
-                    table.insert(Defaults, Idx)
-                end
-            end
-        elseif type(Info.Default) == 'number' and Dropdown.Values[Info.Default] ~= nil then
-            table.insert(Defaults, Info.Default)
+            Info.Default = table.find(Dropdown.Values, Info.Default)
         end
 
-        if next(Defaults) then
-            for i = 1, #Defaults do
-                local Index = Defaults[i]
-                if Info.Multi then
-                    Dropdown.Value[Dropdown.Values[Index]] = true
-                else
-                    Dropdown.Value = Dropdown.Values[Index];
-                end
-
-                if (not Info.Multi) then break end
-            end
+        if Info.Default then
+            if Info.Multi then
+                Dropdown.Value[Dropdown.Values[Info.Default]] = true;
+            else
+                Dropdown.Value = Dropdown.Values[Info.Default];
+            end;
 
             Dropdown:SetValues();
             Dropdown:Display();
-        end
+        end;
 
         Groupbox:AddBlank(Info.BlankSize or 5);
         Groupbox:Resize();
@@ -2564,30 +2520,14 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'MainColor';
         });
 
-        local TabFrame = Library:Create('ScrollingFrame', {
+        local TabFrame = Library:Create('Frame', {
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, 0);
             Visible = false;
             ZIndex = 2;
-            ScrollBarImageTransparency = 0;
-            ScrollBarThickness = 2;
-            BorderSizePixel = 0;
             Parent = TabContainer;
         });
-        local Sized = 0
-        table.insert(Library.Signals, TabFrame.ChildAdded:Connect(function(v)
-            table.insert(Library.Signals, v.ChildAdded:Connect(function(v)
-                if v:IsA("UIListLayout") then
-                    table.insert(Library.Signals, v:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                        if v.AbsoluteContentSize.Y > Sized then
-                            Sized = v.AbsoluteContentSize.Y
-                            TabFrame.CanvasSize = UDim2.fromOffset(0,v.AbsoluteContentSize.Y + 10)
-                        end
-                    end))
-                end;
-            end))
-        end))
 
         local LeftSide = Library:Create('Frame', {
             BackgroundTransparency = 1;
@@ -2683,7 +2623,7 @@ function Library:CreateWindow(...)
                 Position = UDim2.new(0, 4, 0, 2);
                 TextSize = 14;
                 Text = Info.Name;
-                TextXAlignment = Enum.TextXAlignment.Center;
+                TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
@@ -2953,6 +2893,25 @@ function Library:CreateWindow(...)
 
         local oIcon = Mouse.Icon;
         local State = InputService.MouseIconEnabled;
+
+        local Cursor = Drawing.new('Triangle');
+        Cursor.Thickness = 1;
+        Cursor.Filled = true;
+
+        while Outer.Visible do
+            local mPos = workspace.CurrentCamera:WorldToViewportPoint(Mouse.Hit.p);
+
+            Cursor.Color = Library.AccentColor;
+            Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
+            Cursor.PointB = Vector2.new(mPos.X, mPos.Y) + Vector2.new(6, 14);
+            Cursor.PointC = Vector2.new(mPos.X, mPos.Y) + Vector2.new(-6, 14);
+
+            Cursor.Visible = not InputService.MouseIconEnabled;
+
+            RenderStepped:Wait();
+        end;
+
+        Cursor:Remove();
     end
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
@@ -2963,32 +2922,6 @@ function Library:CreateWindow(...)
         elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
             task.spawn(Library.Toggle)
         end
-
-        if Input:IsModifierKeyDown(Enum.ModifierKey.Ctrl) and Outer.Visible then
-            local HoveringColorPicker = nil
-
-            for i, colorPicker in next, Options do
-                if colorPicker.Type == 'ColorPicker' then
-                    local displayFrame = colorPicker.DisplayFrame
-                    local tabFrame = displayFrame and displayFrame:findFirstAncestor('TabFrame')
-
-                    if tabFrame and tabFrame.Visible and Library:IsMouseOverFrame(colorPicker.DisplayFrame) then
-                        HoveringColorPicker = colorPicker
-                        break
-                    end
-                end
-            end
-
-            if not HoveringColorPicker then
-                return
-            end
-
-            if Input.KeyCode == Enum.KeyCode.C then
-                Library.ColorClipboard = HoveringColorPicker.Value
-            elseif Input.KeyCode == Enum.KeyCode.V and Library.ColorClipboard then
-                HoveringColorPicker:SetValueRGB(Library.ColorClipboard)
-            end
-        end
     end))
 
     if Config.AutoShow then task.spawn(Library.Toggle) end
@@ -2997,4 +2930,5 @@ function Library:CreateWindow(...)
 
     return Window;
 end;
-return Library;
+
+return Library
