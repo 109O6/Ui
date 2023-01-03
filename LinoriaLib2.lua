@@ -1855,7 +1855,6 @@ do
             ZIndex = 21;
             Parent = ListInner;
             BorderSizePixel = 0;
-            Visible = false;
 
             TopImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
             BottomImage = 'rbxasset://textures/ui/Scroll/scroll-middle.png',
@@ -1934,6 +1933,7 @@ do
                     ZIndex = 23;
                     Active = true,
                     Parent = Scrolling;
+                    Visible = false;
                 });
 
                 Library:AddToRegistry(Button, {
