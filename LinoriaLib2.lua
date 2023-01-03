@@ -1933,7 +1933,7 @@ do
                     ZIndex = 23;
                     Active = true,
                     Parent = Scrolling;
-                    Visible = false;
+                    Visible = true;
                 });
 
                 Library:AddToRegistry(Button, {
