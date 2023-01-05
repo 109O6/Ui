@@ -2560,14 +2560,29 @@ function Library:CreateWindow(...)
         });
 
         local TabFrame = Library:Create('Frame', {
-            Name = 'TabFrame',
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, 0);
             Visible = false;
             ZIndex = 2;
+            ScrollBarImageTransparency = 0;
+            ScrollBarThickness = 2;
+            BorderSizePixel = 0;
             Parent = TabContainer;
         });
+        local Sized = 0
+        table.insert(Library.Signals, TabFrame.ChildAdded:Connect(function(v)
+            table.insert(Library.Signals, v.ChildAdded:Connect(function(v)
+                if v:IsA("UIListLayout") then
+                    table.insert(Library.Signals, v:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                        if v.AbsoluteContentSize.Y > Sized then
+                            Sized = v.AbsoluteContentSize.Y
+                            TabFrame.CanvasSize = UDim2.fromOffset(0,v.AbsoluteContentSize.Y + 10)
+                        end
+                    end))
+                end;
+            end))
+        end))
 
         local LeftSide = Library:Create('Frame', {
             BackgroundTransparency = 1;
