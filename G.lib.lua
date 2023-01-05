@@ -2415,9 +2415,6 @@ function Library:CreateWindow(...)
         Config.Position = UDim2.fromScale(0.5, 0.5)
     end
     
-    if Config.Backslash then
-        Config.Backslash = "\\\\ Name //"
-    end
 
     local Window = {
         Tabs = {};
@@ -2622,7 +2619,7 @@ function Library:CreateWindow(...)
             TabFrame.Visible = false;
         end;
 
-        function Tab:AddGroupbox(Backslash)
+        function Tab:AddGroupbox(Info)
             local Groupbox = {};
 
             local BoxOuter = Library:Create('Frame', {
