@@ -2700,7 +2700,7 @@ function Library:CreateWindow(...)
             Groupbox:AddBlank(3);
             Groupbox:Resize();
 
-            Tab.Groupboxes[Info.Name] = Groupbox;
+            Tab.Groupboxes(Info,"\\\\ Name //") = Groupbox;
 
             return Groupbox;
         end;
