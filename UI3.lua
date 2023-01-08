@@ -4,7 +4,6 @@ local TweenService = game:GetService('TweenService');
 local CoreGui = game:GetService('CoreGui');
 local RunService = game:GetService('RunService')
 local GuiService = game:GetService('GuiService')
-local Stats = game:GetService('Stats')
 local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = game:GetService('Players').LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
@@ -47,27 +46,22 @@ local Library = {
 
 local RainbowStep = 0
 local Hue = 0
-local Start = tick()
-local LastRefresh = tick() - 1
 local SetWatermarkText = "None"
 
 function Library:UpdateWatermarkInformation(Delta)
-    if (tick() - LastRefresh) > 1 then
-        LastRefresh = tick()
 
-        local sec = (tick() - Start)
-
-        local min = (sec - sec%60)/60
-        sec = sec - min*60
-        local hr = ((min - min%60)/60)
-        min = min - hr*60
+        local sec = math.floor(workspace.DistributedGameTime)
+        local min = math.floor(workspace.DistributedGameTime/60)
+        local hr = math.floor(workspace.DistributedGameTime/60/60)
+        local sec = sec - (min*60)
+        local min = min - (hr*60)
 
         local NewText = SetWatermarkText
         :gsub("{Username}", tostring(LocalPlayer.Name))
         :gsub("{Date}", tostring(os.date("%b %d %Y")))
         :gsub("{Time}", tostring(os.date("%I:%M %p")))
         :gsub("{Ping}", string.format("%s MS", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
-        :gsub("{ElapsedTime}", string.format(hr.."Hour(s)"..min.."Minute(s)"..sec.."Second(s)", string.format(hr), string.format(min), string.format(sec)))
+        :gsub("{ElapsedTime}", string.format(hr.. "Hour(s)" ..min.. "Minute(s)" ..sec.. "Second(s)", string.format(hr), string.format(min), string.format(sec)))
         :gsub("{FPS}", string.format("%s FPS", math.floor(1 / Delta)))
 
         local X, Y = Library:GetTextBounds(NewText, Enum.Font.Code, 14)
