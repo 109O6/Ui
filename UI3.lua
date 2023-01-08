@@ -33,9 +33,11 @@ local Library = {
     MainColor = Color3.fromRGB(28, 28, 28);
     BackgroundColor = Color3.fromRGB(20, 20, 20);
     AccentColor = Color3.fromRGB(0, 85, 255);
+    InlineColor = Color3.fromRGB(75, 75, 75);
     OutlineColor = Color3.fromRGB(50, 50, 50);
 
     Black = Color3.new(0, 0, 0);
+    Font = Enum.Font.Code,
 
     OpenedFrames = {};
 
@@ -53,19 +55,19 @@ function Library:UpdateWatermarkInformation(Delta)
     if (tick() - LastRefresh) > 1 then
         LastRefresh = tick()
 
-        local Seconds = (tick() - Start)
-        
-        local Minutes = (Seconds - Seconds%60)/60
-        Seconds = Seconds - Minutes*60
-        local Hours = ((Minutes - Minutes%60)/60)
-        Minutes = Minutes - Hours*60
+        local sec = (tick() - Start)
+
+        local min = (sec - sec%60)/60
+        sec = sec - min*60
+        local hr = ((min - min%60)/60)
+        min = min - hr*60
 
         local NewText = SetWatermarkText
         :gsub("{Username}", tostring(LocalPlayer.Name))
         :gsub("{Date}", tostring(os.date("%b %d %Y")))
         :gsub("{Time}", tostring(os.date("%I:%M %p")))
         :gsub("{Ping}", string.format("%s MS", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
-        :gsub("{ElapsedTime}", string.format("%s:%s:%s", string.format("%02i", Hours " Hour(s) "), string.format("%02i", Minutes), string.format("%02i", Seconds)))
+        :gsub("{ElapsedTime}", string.format(hr.."Hour(s)"..min.."Minute(s)"..sec.."Second(s)", string.format(hr), string.format(min), string.format(sec)))
         :gsub("{FPS}", string.format("%s FPS", math.floor(1 / Delta)))
 
         local X, Y = Library:GetTextBounds(NewText, Enum.Font.Code, 14)
@@ -119,7 +121,7 @@ end;
 function Library:CreateLabel(Properties, IsHud)
     local _Instance = Library:Create('TextLabel', {
         BackgroundTransparency = 1;
-        Font = Enum.Font.Code;
+        Font = Library.Font;
         TextColor3 = Library.FontColor;
         TextSize = 16;
         TextStrokeTransparency = 0;
@@ -161,7 +163,7 @@ function Library:MakeDraggable(Instance, Cutoff)
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
-    local X, Y = Library:GetTextBounds(InfoStr, Enum.Font.Code, 14);
+    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14);
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor,        
         BorderColor3 = Library.OutlineColor,
@@ -475,8 +477,8 @@ do
             Parent = HueSelectorOuter;
         });
 
-        local HueTextSize = Library:GetTextBounds('Hex color', Enum.Font.Code, 16) + 3
-        local RgbTextSize = Library:GetTextBounds('255, 255, 255', Enum.Font.Code, 16) + 3
+        local HueTextSize = Library:GetTextBounds('Hex color', Library.Font, 16) + 3
+        local RgbTextSize = Library:GetTextBounds('255, 255, 255', Library.Font, 16) + 3
 
         local HueBoxOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
@@ -508,7 +510,7 @@ do
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 5, 0, 0);
             Size = UDim2.new(1, -5, 1, 0);
-            Font = Enum.Font.Code;
+            Font = Library.Font;
             PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
             PlaceholderText = 'Hex color',
             Text = '#FFFFFF',
@@ -858,15 +860,11 @@ do
             local State = KeyPicker:GetState();
 
             ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+
+            ContainerLabel.Visible = true;
             ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
 
             Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
-
-            if KeyPicker.Value == "Unknown" then
-                ContainerLabel.Visible = false
-            else
-                ContainerLabel.Visible = true
-            end
 
             local YSize = 0
             local XSize = 0
@@ -904,13 +902,7 @@ do
             local Key, Mode = Data[1], Data[2];
             DisplayLabel.Text = Key;
             KeyPicker.Value = Key;
-
-            for i, v in next, ModeButtons do
-                if i == Mode then
-                    v:Select()
-                end
-            end
-
+            ModeButtons[Mode]:Select();
             KeyPicker:Update();
         end;
 
@@ -969,8 +961,6 @@ do
                         Key = 'MB1';
                     elseif Input.UserInputType == Enum.UserInputType.MouseButton2 then
                         Key = 'MB2';
-                    elseif Input.UserInputType == Enum.UserInputType.MouseButton3 then
-                        Key = 'Unknown';
                     end;
 
                     Break = true;
@@ -988,8 +978,8 @@ do
             end;
         end);
 
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input, GameProccessed)
-            if (not Picking and not GameProccessed) then
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+            if (not Picking) then
                 if KeyPicker.Mode == 'Toggle' then
                     local Key = KeyPicker.Value;
 
@@ -1075,7 +1065,7 @@ do
         });
 
         if DoesWrap then
-            local Y = select(2, Library:GetTextBounds(Text, Enum.Font.Code, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
+            local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
             TextLabel.Size = UDim2.new(1, -4, 0, Y)
         else
             Library:Create('UIListLayout', {
@@ -1094,7 +1084,7 @@ do
             TextLabel.Text = Text
 
             if DoesWrap then
-                local Y = select(2, Library:GetTextBounds(Text, Enum.Font.Code, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
+                local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
                 TextLabel.Size = UDim2.new(1, -4, 0, Y)
             end
 
@@ -1350,7 +1340,7 @@ do
             Position = UDim2.fromOffset(0, 0),
             Size = UDim2.fromScale(5, 1),
             
-            Font = Enum.Font.Code;
+            Font = Library.Font;
             PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
             PlaceholderText = Info.Placeholder or '';
 
@@ -2213,7 +2203,7 @@ do
 
     local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.MainColor;
+        BorderColor3 = Library.AccentColor;
         BorderMode = Enum.BorderMode.Inset;
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 201;
@@ -2221,7 +2211,7 @@ do
     });
 
     Library:AddToRegistry(WatermarkInner, {
-        BorderColor3 = 'MainColor';
+        BorderColor3 = 'AccentColor';
     });
 
     local InnerFrame = Library:Create('Frame', {
@@ -2255,7 +2245,6 @@ do
         Position = UDim2.new(0, 5, 0, 0);
         Size = UDim2.new(1, -4, 1, 0);
         TextSize = 14;
-        RichText = true;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
         Parent = InnerFrame;
@@ -2342,7 +2331,7 @@ function Library:SetWatermarkVisibility(Bool)
 end;
 
 function Library:SetWatermark(Text)
-    local X, Y = Library:GetTextBounds(Text, Enum.Font.Code, 14);
+    local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
     Library.Watermark.Size = UDim2.new(0, X + 15, 0, (Y * 1.5) + 3);
     Library:SetWatermarkVisibility(true)
 
@@ -2351,7 +2340,7 @@ function Library:SetWatermark(Text)
 end;
 
 function Library:Notify(Text, Time)
-    local XSize, YSize = Library:GetTextBounds(Text, Enum.Font.Code, 14);
+    local XSize, YSize = Library:GetTextBounds(Text, Library.Font, 14);
 
     YSize = YSize + 7
 
@@ -2449,7 +2438,7 @@ function Library:CreateWindow(...)
         Config = ...;
     else
         Config.Title = Arguments[1]
-        Config.AutoShow = Arguments[2] or false;
+        Config.AutoShow = Arguments[2] or true;
     end
     
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
@@ -2461,6 +2450,7 @@ function Library:CreateWindow(...)
         Config.AnchorPoint = Vector2.new(0.5, 0.5)
         Config.Position = UDim2.fromScale(0.5, 0.5)
     end
+    
 
     local Window = {
         Tabs = {};
@@ -2481,7 +2471,7 @@ function Library:CreateWindow(...)
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.MainColor;
+        BorderColor3 = Library.AccentColor;
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
@@ -2491,7 +2481,7 @@ function Library:CreateWindow(...)
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'MainColor';
+        BorderColor3 = 'AccentColor';
     });
 
     local WindowLabel = Library:CreateLabel({
@@ -2500,7 +2490,6 @@ function Library:CreateWindow(...)
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
-        RichText = true;
         Parent = Inner;
     });
 
@@ -2571,7 +2560,7 @@ function Library:CreateWindow(...)
             Tabboxes = {};
         };
 
-        local TabButtonWidth = Library:GetTextBounds(Name, Enum.Font.Code, 16);
+        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
 
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
