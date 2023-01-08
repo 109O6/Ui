@@ -2336,6 +2336,7 @@ function Library:SetWatermark(Text)
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
+    SetWatermarkText = Text
 end;
 
 function Library:Notify(Text, Time)
