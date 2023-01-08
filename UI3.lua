@@ -55,19 +55,19 @@ function Library:UpdateWatermarkInformation(Delta)
     if (tick() - LastRefresh) > 1 then
         LastRefresh = tick()
 
-        local Seconds = (tick() - Start)
+        local sec = (tick() - Start)
         
-        local Minutes = (Seconds - Seconds%60)/60
-        Seconds = Seconds - Minutes*60
-        local Hours = ((Minutes - Minutes%60)/60)
-        Minutes = Minutes - Hours*60
+        local min = (sec - sec%60)/60
+        sec = sec - min*60
+        local hr = ((min - min%60)/60)
+        min = min - hr*60
 
         local NewText = SetWatermarkText
         :gsub("{Username}", tostring(LocalPlayer.Name))
         :gsub("{Date}", tostring(os.date("%b %d %Y")))
         :gsub("{Time}", tostring(os.date("%I:%M %p")))
         :gsub("{Ping}", string.format("%s MS", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
-        :gsub("{ElapsedTime}", string.format("%s:%s:%s", string.format("%02i", Hours Hour(s) ), string.format("%02i", Minutes Minute(s) ), string.format("%02i", Seconds Second(s))))
+        :gsub("{ElapsedTime}", string.format("%s:%s:%s", string.format("%02i", hr Hour(s) ), string.format("%02i", min Minute(s) ), string.format("%02i", sec Second(s))))
         :gsub("{FPS}", string.format("%s FPS", math.floor(1 / Delta)))
 
         local X, Y = Library:GetTextBounds(NewText, Enum.Font.Code, 14)
