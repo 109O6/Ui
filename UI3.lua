@@ -67,7 +67,7 @@ function Library:UpdateWatermarkInformation(Delta)
         :gsub("{Date}", tostring(os.date("%A %d %B %Y")))
         :gsub("{Time}", tostring(os.date("%X")))
         :gsub("{Ping}", string.format("%s MS", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
-        :gsub("{ElapsedTime}", string.format("%s Hour(s):%s Minute(s):%s Second(s)", string.format("%02i", hr), string.format("%02i", min), string.format("%02i", sec)))
+        :gsub("{ElapsedTime}", string.format("%s Hour(s) %s Minute(s) %s Second(s)", string.format("%0i", hr), string.format("%0i", min), string.format("%0i", sec)))
         :gsub("{FPS}", string.format("%s FPS", math.floor(1 / Delta)))
 
         local X, Y = Library:GetTextBounds(NewText, Enum.Font.Code, 14)
