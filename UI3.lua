@@ -4,6 +4,7 @@ local TweenService = game:GetService('TweenService');
 local CoreGui = game:GetService('CoreGui');
 local RunService = game:GetService('RunService')
 local GuiService = game:GetService('GuiService')
+local Stats = game:GetService('Stats')
 local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = game:GetService('Players').LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
@@ -46,15 +47,20 @@ local Library = {
 
 local RainbowStep = 0
 local Hue = 0
+local Start = tick()
+local LastRefresh = tick() - 1
 local SetWatermarkText = "None"
 
 function Library:UpdateWatermarkInformation(Delta)
+    if (tick() - LastRefresh) > 1 then
+        LastRefresh = tick()
 
-        local sec = math.floor(workspace.DistributedGameTime)
-        local min = math.floor(workspace.DistributedGameTime/60)
-        local hr = math.floor(workspace.DistributedGameTime/60/60)
-        local sec = sec - (min*60)
-        local min = min - (hr*60)
+        local sec = (tick() - Start)
+        
+        local min = (sec - sec%60)/60
+        sec = sec - min*60
+        local hr = ((min - min%60)/60)
+        min = min - hr*60
 
         local NewText = SetWatermarkText
         :gsub("{Username}", tostring(LocalPlayer.Name))
