@@ -66,7 +66,7 @@ function Library:UpdateWatermarkInformation(Delta)
         :gsub("{Username}", tostring(LocalPlayer.Name))
         :gsub("{Date}", tostring(os.date("%A %d %B %Y")))
         :gsub("{Time}", tostring(os.date("%X")))
-        :gsub("{Ping}", string.format("%s MS", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
+        :gsub("{Ping}", string.format("%s Ping", math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())))
         :gsub("{ElapsedTime}", string.format("%s Hour(s) %s Minute(s) %s Second(s)", string.format("%0i", hr), string.format("%0i", min), string.format("%0i", sec)))
         :gsub("{FPS}", string.format("%s FPS", math.floor(1 / Delta)))
 
